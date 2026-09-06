@@ -517,9 +517,10 @@
   });
 
   function showLoading(){
-    document.getElementById("sheetLoading").style.display = "";
+    var loadingSheet = document.getElementById("sheetLoading");
+    loadingSheet.style.display = "";
     overlay.innerHTML = "";
-    overlay.appendChild(document.getElementById("sheetLoading"));
+    overlay.appendChild(loadingSheet);
     overlay.classList.add("show");
   }
 
