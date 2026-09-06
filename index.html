@@ -506,15 +506,37 @@
   fileInput.addEventListener("change", function(){
     var file = fileInput.files[0];
     if(!file) return;
-    var reader = new FileReader();
-    reader.onload = function(){
-      var dataUrl = reader.result;
-      var base64 = dataUrl.split(",")[1];
-      recognizeFood(base64, file.type, dataUrl);
-    };
-    reader.readAsDataURL(file);
     fileInput.value = "";
+    resizeImage(file, 1024, 0.8).then(function(dataUrl){
+      var base64 = dataUrl.split(",")[1];
+      recognizeFood(base64, "image/jpeg", dataUrl);
+    }).catch(function(){
+      alert("讀取照片失敗，請再試一次。");
+    });
   });
+
+  function resizeImage(file, maxDim, quality){
+    return new Promise(function(resolve, reject){
+      var reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = function(){
+        var img = new Image();
+        img.onerror = reject;
+        img.onload = function(){
+          var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+          var w = Math.round(img.width * scale);
+          var h = Math.round(img.height * scale);
+          var canvas = document.createElement("canvas");
+          canvas.width = w;
+          canvas.height = h;
+          canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL("image/jpeg", quality));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
 
   function showLoading(){
     var loadingSheet = document.getElementById("sheetLoading");
@@ -526,12 +548,17 @@
 
   function recognizeFood(base64, mimeType, previewSrc){
     showLoading();
+    var controller = new AbortController();
+    var timeoutId = setTimeout(function(){ controller.abort(); }, 25000);
+
     fetch(getApiUrl(), {
       method: "POST",
-      body: JSON.stringify({ image: base64, mimeType: mimeType })
+      body: JSON.stringify({ image: base64, mimeType: mimeType }),
+      signal: controller.signal
     })
     .then(function(res){ return res.json(); })
     .then(function(data){
+      clearTimeout(timeoutId);
       overlay.classList.remove("show");
       if(data.error){
         alert("辨識失敗：" + data.error);
@@ -540,8 +567,13 @@
       showConfirmSheet(data, previewSrc);
     })
     .catch(function(err){
+      clearTimeout(timeoutId);
       overlay.classList.remove("show");
-      alert("連線失敗，請確認網址設定是否正確，或稍後再試一次。");
+      if(err && err.name === "AbortError"){
+        alert("辨識逾時（超過 25 秒沒有回應），請確認 Apps Script 網址是否正確，或稍後再試一次。");
+      }else{
+        alert("連線失敗，請確認網址設定是否正確，或稍後再試一次。");
+      }
     });
   }
 
