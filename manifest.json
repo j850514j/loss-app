@@ -1,0 +1,14 @@
+{
+  "name": "減脂記錄",
+  "short_name": "減脂記錄",
+  "description": "拍照記錄飲食、追蹤糖分攝取與體態變化",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F5F6F0",
+  "theme_color": "#1F3D2B",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

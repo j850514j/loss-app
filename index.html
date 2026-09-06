@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>減脂記錄</title>
+<meta name="theme-color" content="#1F3D2B">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+  :root{
+    --ink:#1F3D2B;
+    --paper:#F5F6F0;
+    --card:#FFFFFF;
+    --line:#DEE3D4;
+    --muted:#6B7566;
+    --alert:#C1443D;
+    --alert-soft:#F5DEDC;
+    --ok:#4C7A55;
+    --ok-soft:#DEEBDF;
+    --radius:14px;
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);}
+  body{
+    min-height:100vh;
+    min-height:100dvh;
+    display:flex;
+    flex-direction:column;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  h1,h2,h3{
+    font-family:Georgia,"Iowan Old Style","Noto Serif TC",serif;
+    font-weight:600;
+    margin:0;
+  }
+  .num{
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    font-variant-numeric:tabular-nums;
+  }
+  header.top{
+    padding:20px 20px 14px;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+  }
+  header.top h1{font-size:22px;letter-spacing:0.02em;}
+  header.top .date{font-size:13px;color:var(--muted);}
+
+  main{
+    flex:1;
+    overflow-y:auto;
+    padding:0 16px 100px;
+    max-width:480px;
+    width:100%;
+    margin:0 auto;
+  }
+
+  .page{display:none;}
+  .page.active{display:block;}
+
+  /* ---- Sugar summary gauge ---- */
+  .sugar-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:18px 18px 16px;
+    margin-bottom:18px;
+  }
+  .sugar-card .row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:10px;
+  }
+  .sugar-card .label{font-size:14px;color:var(--muted);}
+  .sugar-card .amount{font-size:26px;}
+  .sugar-card .amount span{font-size:14px;color:var(--muted);font-family:inherit;}
+  .gauge-track{
+    height:8px;
+    border-radius:99px;
+    background:var(--line);
+    overflow:hidden;
+  }
+  .gauge-fill{
+    height:100%;
+    background:var(--ok);
+    border-radius:99px;
+    transition:width .35s ease, background .35s ease;
+  }
+  .gauge-fill.warn{background:var(--alert);}
+
+  /* ---- Capture button ---- */
+  .capture-btn{
+    width:100%;
+    border:none;
+    border-radius:var(--radius);
+    background:var(--ink);
+    color:var(--paper);
+    padding:18px;
+    font-size:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin-bottom:20px;
+    cursor:pointer;
+  }
+  .capture-btn:active{opacity:.85;}
+  .capture-btn svg{width:22px;height:22px;flex-shrink:0;}
+
+  input[type=file]{display:none;}
+
+  /* ---- Log list ---- */
+  .section-title{
+    font-size:13px;
+    color:var(--muted);
+    margin:4px 0 10px;
+  }
+  .entry{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-left:3px solid var(--ok);
+    border-radius:10px;
+    padding:12px 14px;
+    margin-bottom:10px;
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .entry.high-sugar{border-left-color:var(--alert);}
+  .entry .meta{flex:1;min-width:0;}
+  .entry .food{font-size:15px;margin-bottom:4px;}
+  .entry .time{font-size:12px;color:var(--muted);}
+  .entry .stats{
+    text-align:right;
+    font-size:13px;
+    color:var(--muted);
+    white-space:nowrap;
+  }
+  .entry .stats .kcal{color:var(--ink);}
+  .entry .del{
+    background:none;border:none;color:var(--muted);
+    font-size:18px;line-height:1;cursor:pointer;padding:0 0 0 8px;
+  }
+  .empty-state{
+    text-align:center;
+    color:var(--muted);
+    padding:40px 20px;
+    font-size:14px;
+  }
+
+  /* ---- Loading / modal ---- */
+  .overlay{
+    position:fixed;inset:0;
+    background:rgba(31,61,43,0.55);
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+    z-index:50;
+  }
+  .overlay.show{display:flex;}
+  .sheet{
+    background:var(--card);
+    width:100%;
+    max-width:480px;
+    border-radius:20px 20px 0 0;
+    padding:22px 20px calc(22px + env(safe-area-inset-bottom));
+    max-height:85vh;
+    overflow-y:auto;
+  }
+  .sheet h2{font-size:18px;margin-bottom:16px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;}
+  .field input, .field textarea{
+    width:100%;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:11px 12px;
+    font-size:15px;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:inherit;
+  }
+  .sheet-preview{
+    width:100%;
+    max-height:180px;
+    object-fit:cover;
+    border-radius:12px;
+    margin-bottom:16px;
+    background:var(--line);
+  }
+  .sheet-actions{display:flex;gap:10px;margin-top:6px;}
+  .btn{
+    flex:1;
+    padding:13px;
+    border-radius:10px;
+    border:none;
+    font-size:15px;
+    cursor:pointer;
+  }
+  .btn.primary{background:var(--ink);color:var(--paper);}
+  .btn.ghost{background:var(--paper);color:var(--ink);border:1px solid var(--line);}
+
+  .spinner-wrap{
+    display:flex;flex-direction:column;align-items:center;gap:14px;
+    padding:30px 10px 10px;
+  }
+  .spinner{
+    width:34px;height:34px;
+    border-radius:50%;
+    border:3px solid var(--line);
+    border-top-color:var(--ink);
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .spinner-wrap p{font-size:14px;color:var(--muted);margin:0;}
+
+  /* ---- Settings page ---- */
+  .settings-group{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px 16px 4px;
+    margin-bottom:18px;
+  }
+  .settings-group h3{font-size:14px;margin-bottom:12px;}
+  .hint{font-size:12px;color:var(--muted);margin-top:-6px;margin-bottom:14px;line-height:1.5;}
+  .save-msg{
+    font-size:13px;color:var(--ok);height:18px;margin-top:2px;
+  }
+
+  .placeholder-page{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--muted);
+  }
+  .placeholder-page h2{color:var(--ink);font-size:18px;margin-bottom:8px;}
+  .placeholder-page p{font-size:14px;line-height:1.6;}
+
+  /* ---- Bottom nav ---- */
+  nav.bottom{
+    position:fixed;
+    bottom:0;left:0;right:0;
+    background:var(--card);
+    border-top:1px solid var(--line);
+    display:flex;
+    padding-bottom:env(safe-area-inset-bottom);
+    z-index:20;
+  }
+  nav.bottom button{
+    flex:1;
+    background:none;
+    border:none;
+    padding:12px 4px 10px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    color:var(--muted);
+    cursor:pointer;
+    font-size:11px;
+    font-family:inherit;
+  }
+  nav.bottom button svg{width:22px;height:22px;}
+  nav.bottom button.active{color:var(--ink);}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>減脂記錄</h1>
+  <div class="date num" id="todayLabel"></div>
+</header>
+
+<main>
+
+  <!-- 飲食紀錄頁 -->
+  <section class="page active" id="page-log">
+    <div class="sugar-card">
+      <div class="row">
+        <span class="label">今日糖分攝取</span>
+        <span class="amount num"><span id="sugarToday">0</span><span> / <span id="sugarLimit">25</span> g</span></span>
+      </div>
+      <div class="gauge-track"><div class="gauge-fill" id="sugarGauge" style="width:0%"></div></div>
+    </div>
+
+    <button class="capture-btn" id="captureBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.4"/></svg>
+      拍照記錄這餐
+    </button>
+    <input type="file" id="fileInput" accept="image/*" capture="environment">
+
+    <div class="section-title">今天吃了什麼</div>
+    <div id="entryList"></div>
+  </section>
+
+  <!-- 趨勢頁（之後開發） -->
+  <section class="page" id="page-trend">
+    <div class="placeholder-page">
+      <h2>趨勢圖表</h2>
+      <p>體重、體脂變化趨勢功能<br>下一階段開發中。</p>
+    </div>
+  </section>
+
+  <!-- 設定頁 -->
+  <section class="page" id="page-settings">
+    <div class="settings-group">
+      <h3>辨識服務</h3>
+      <div class="field">
+        <label>Apps Script Web App 網址</label>
+        <input type="text" id="apiUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
+      </div>
+      <p class="hint">拍照辨識需要一個代理網址才能運作，請依照 README 部署你自己的 Google Apps Script，再把產生的網址貼在這裡。</p>
+    </div>
+
+    <div class="settings-group">
+      <h3>糖分目標</h3>
+      <div class="field">
+        <label>每日糖分上限（克）</label>
+        <input type="number" id="sugarLimitInput" min="0" step="1">
+      </div>
+      <p class="hint">預設 25 克，是世界衛生組織建議的每日添加糖上限，可依你自己的目標調整。</p>
+    </div>
+
+    <button class="btn primary" id="saveSettingsBtn" style="width:100%;margin-bottom:8px;">儲存設定</button>
+    <div class="save-msg" id="saveMsg"></div>
+  </section>
+
+</main>
+
+<nav class="bottom">
+  <button class="active" data-page="log">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.4"/></svg>
+    紀錄
+  </button>
+  <button data-page="trend">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19V5M4 19h16M8 15l3-4 3 3 4-6"/></svg>
+    趨勢
+  </button>
+  <button data-page="settings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V19a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H4a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.56-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H10a1.7 1.7 0 0 0 1-1.55V4a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V10a1.7 1.7 0 0 0 1.55 1H20a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.56 1z"/></svg>
+    設定
+  </button>
+</nav>
+
+<!-- 辨識中 / 確認結果 sheet -->
+<div class="overlay" id="overlay">
+  <div class="sheet" id="sheetLoading">
+    <div class="spinner-wrap">
+      <div class="spinner"></div>
+      <p>正在辨識這張照片…</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEYS = {
+    entries: "fatloss_entries_v1",
+    apiUrl: "fatloss_api_url_v1",
+    sugarLimit: "fatloss_sugar_limit_v1"
+  };
+
+  function todayKey(){
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+  }
+
+  function loadEntries(){
+    try{
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.entries) || "{}");
+    }catch(e){ return {}; }
+  }
+  function saveEntries(all){
+    localStorage.setItem(STORAGE_KEYS.entries, JSON.stringify(all));
+  }
+  function getTodayEntries(){
+    var all = loadEntries();
+    return all[todayKey()] || [];
+  }
+  function addEntry(entry){
+    var all = loadEntries();
+    var key = todayKey();
+    if(!all[key]) all[key] = [];
+    all[key].unshift(entry);
+    saveEntries(all);
+  }
+  function deleteEntry(id){
+    var all = loadEntries();
+    var key = todayKey();
+    if(!all[key]) return;
+    all[key] = all[key].filter(function(e){ return e.id !== id; });
+    saveEntries(all);
+  }
+
+  function getSugarLimit(){
+    var v = parseFloat(localStorage.getItem(STORAGE_KEYS.sugarLimit));
+    return isNaN(v) ? 25 : v;
+  }
+  function getApiUrl(){
+    return localStorage.getItem(STORAGE_KEYS.apiUrl) || "";
+  }
+
+  // ---------- render ----------
+  function renderDate(){
+    var d = new Date();
+    var wk = ["日","一","二","三","四","五","六"][d.getDay()];
+    document.getElementById("todayLabel").textContent =
+      d.getMonth()+1 + "/" + d.getDate() + " (週" + wk + ")";
+  }
+
+  function renderSugar(){
+    var entries = getTodayEntries();
+    var total = entries.reduce(function(sum, e){ return sum + (Number(e.sugar_g)||0); }, 0);
+    var limit = getSugarLimit();
+    document.getElementById("sugarToday").textContent = Math.round(total*10)/10;
+    document.getElementById("sugarLimit").textContent = limit;
+    var pct = limit > 0 ? Math.min(100, (total/limit)*100) : 0;
+    var fill = document.getElementById("sugarGauge");
+    fill.style.width = pct + "%";
+    fill.classList.toggle("warn", total > limit);
+  }
+
+  function renderEntries(){
+    var entries = getTodayEntries();
+    var list = document.getElementById("entryList");
+    list.innerHTML = "";
+    if(entries.length === 0){
+      list.innerHTML = '<div class="empty-state">還沒有紀錄，拍張照片開始吧</div>';
+      return;
+    }
+    entries.forEach(function(e){
+      var row = document.createElement("div");
+      row.className = "entry" + (Number(e.sugar_g) >= 10 ? " high-sugar" : "");
+      row.innerHTML =
+        '<div class="meta">' +
+          '<div class="food">' + escapeHtml(e.food_name) + '</div>' +
+          '<div class="time">' + e.time + (e.note ? " · " + escapeHtml(e.note) : "") + '</div>' +
+        '</div>' +
+        '<div class="stats">' +
+          '<div class="kcal num">' + (e.calories!=null ? e.calories + " kcal" : "—") + '</div>' +
+          '<div class="num">糖 ' + (e.sugar_g!=null ? e.sugar_g + "g" : "—") + '</div>' +
+        '</div>' +
+        '<button class="del" data-id="' + e.id + '" aria-label="刪除">×</button>';
+      list.appendChild(row);
+    });
+    list.querySelectorAll(".del").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        deleteEntry(btn.getAttribute("data-id"));
+        renderEntries();
+        renderSugar();
+      });
+    });
+  }
+
+  function escapeHtml(s){
+    var d = document.createElement("div");
+    d.textContent = s == null ? "" : String(s);
+    return d.innerHTML;
+  }
+
+  // ---------- navigation ----------
+  document.querySelectorAll("nav.bottom button").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      document.querySelectorAll("nav.bottom button").forEach(function(b){ b.classList.remove("active"); });
+      btn.classList.add("active");
+      document.querySelectorAll(".page").forEach(function(p){ p.classList.remove("active"); });
+      document.getElementById("page-" + btn.getAttribute("data-page")).classList.add("active");
+    });
+  });
+
+  // ---------- settings ----------
+  function loadSettingsForm(){
+    document.getElementById("apiUrlInput").value = getApiUrl();
+    document.getElementById("sugarLimitInput").value = getSugarLimit();
+  }
+  document.getElementById("saveSettingsBtn").addEventListener("click", function(){
+    var url = document.getElementById("apiUrlInput").value.trim();
+    var limit = parseFloat(document.getElementById("sugarLimitInput").value);
+    localStorage.setItem(STORAGE_KEYS.apiUrl, url);
+    localStorage.setItem(STORAGE_KEYS.sugarLimit, isNaN(limit) ? 25 : limit);
+    renderSugar();
+    var msg = document.getElementById("saveMsg");
+    msg.textContent = "已儲存";
+    setTimeout(function(){ msg.textContent = ""; }, 1800);
+  });
+
+  // ---------- capture & recognition ----------
+  var overlay = document.getElementById("overlay");
+  var fileInput = document.getElementById("fileInput");
+
+  document.getElementById("captureBtn").addEventListener("click", function(){
+    if(!getApiUrl()){
+      alert("請先到「設定」頁貼上你的 Apps Script 網址，才能使用拍照辨識。");
+      return;
+    }
+    fileInput.click();
+  });
+
+  fileInput.addEventListener("change", function(){
+    var file = fileInput.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      var dataUrl = reader.result;
+      var base64 = dataUrl.split(",")[1];
+      recognizeFood(base64, file.type, dataUrl);
+    };
+    reader.readAsDataURL(file);
+    fileInput.value = "";
+  });
+
+  function showLoading(){
+    document.getElementById("sheetLoading").style.display = "";
+    overlay.innerHTML = "";
+    overlay.appendChild(document.getElementById("sheetLoading"));
+    overlay.classList.add("show");
+  }
+
+  function recognizeFood(base64, mimeType, previewSrc){
+    showLoading();
+    fetch(getApiUrl(), {
+      method: "POST",
+      body: JSON.stringify({ image: base64, mimeType: mimeType })
+    })
+    .then(function(res){ return res.json(); })
+    .then(function(data){
+      overlay.classList.remove("show");
+      if(data.error){
+        alert("辨識失敗：" + data.error);
+        return;
+      }
+      showConfirmSheet(data, previewSrc);
+    })
+    .catch(function(err){
+      overlay.classList.remove("show");
+      alert("連線失敗，請確認網址設定是否正確，或稍後再試一次。");
+    });
+  }
+
+  function showConfirmSheet(result, previewSrc){
+    var sheet = document.createElement("div");
+    sheet.className = "sheet";
+    sheet.innerHTML =
+      '<h2>確認這餐的紀錄</h2>' +
+      '<img class="sheet-preview" src="' + previewSrc + '">' +
+      '<div class="field"><label>食物名稱</label><input type="text" id="cf_name" value="' + escapeHtml(result.food_name || "") + '"></div>' +
+      '<div class="field"><label>估計熱量（kcal）</label><input type="number" id="cf_kcal" value="' + (result.calories != null ? result.calories : "") + '"></div>' +
+      '<div class="field"><label>估計糖分（克）</label><input type="number" id="cf_sugar" value="' + (result.sugar_g != null ? result.sugar_g : "") + '"></div>' +
+      '<div class="field"><label>備註（選填）</label><input type="text" id="cf_note" value="' + escapeHtml(result.note || "") + '"></div>' +
+      '<div class="sheet-actions">' +
+        '<button class="btn ghost" id="cf_cancel">取消</button>' +
+        '<button class="btn primary" id="cf_save">儲存紀錄</button>' +
+      '</div>';
+    overlay.innerHTML = "";
+    overlay.appendChild(sheet);
+    overlay.classList.add("show");
+
+    document.getElementById("cf_cancel").addEventListener("click", function(){
+      overlay.classList.remove("show");
+    });
+    document.getElementById("cf_save").addEventListener("click", function(){
+      var now = new Date();
+      addEntry({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+        food_name: document.getElementById("cf_name").value.trim() || "未命名餐點",
+        calories: numOrNull(document.getElementById("cf_kcal").value),
+        sugar_g: numOrNull(document.getElementById("cf_sugar").value),
+        note: document.getElementById("cf_note").value.trim(),
+        time: String(now.getHours()).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0")
+      });
+      overlay.classList.remove("show");
+      renderEntries();
+      renderSugar();
+    });
+  }
+
+  function numOrNull(v){
+    var n = parseFloat(v);
+    return isNaN(n) ? null : Math.round(n*10)/10;
+  }
+
+  // ---------- init ----------
+  renderDate();
+  renderSugar();
+  renderEntries();
+  loadSettingsForm();
+
+  if("serviceWorker" in navigator){
+    window.addEventListener("load", function(){
+      navigator.serviceWorker.register("sw.js").catch(function(){});
+    });
+  }
+})();
+</script>
+</body>
+</html>
