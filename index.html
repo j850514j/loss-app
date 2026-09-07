@@ -205,6 +205,20 @@
   .btn.primary{background:var(--ink);color:var(--paper);}
   .btn.ghost{background:var(--paper);color:var(--ink);border:1px solid var(--line);}
 
+  .link-btn{
+    display:block;
+    width:100%;
+    background:none;
+    border:none;
+    color:var(--muted);
+    font-size:13px;
+    text-decoration:underline;
+    padding:0 0 20px;
+    text-align:center;
+    cursor:pointer;
+    font-family:inherit;
+  }
+
   .spinner-wrap{
     display:flex;flex-direction:column;align-items:center;gap:14px;
     padding:30px 10px 10px;
@@ -300,6 +314,7 @@
     </div>
     <input type="file" id="fileInput" accept="image/*" capture="environment">
     <input type="file" id="libraryInput" accept="image/*">
+    <button class="link-btn" id="manualAddBtn">或手動輸入紀錄（也可以補之前的日期）</button>
 
     <div class="section-title">今天吃了什麼</div>
     <div id="entryList"></div>
@@ -355,14 +370,7 @@
 </nav>
 
 <!-- 辨識中 / 確認結果 sheet -->
-<div class="overlay" id="overlay">
-  <div class="sheet" id="sheetLoading">
-    <div class="spinner-wrap">
-      <div class="spinner"></div>
-      <p>正在辨識這張照片…</p>
-    </div>
-  </div>
-</div>
+<div class="overlay" id="overlay"></div>
 
 <script>
 (function(){
@@ -391,9 +399,9 @@
     var all = loadEntries();
     return all[todayKey()] || [];
   }
-  function addEntry(entry){
+  function addEntry(entry, dateKey){
     var all = loadEntries();
-    var key = todayKey();
+    var key = dateKey || todayKey();
     if(!all[key]) all[key] = [];
     all[key].unshift(entry);
     saveEntries(all);
@@ -519,6 +527,10 @@
     libraryInput.click();
   });
 
+  document.getElementById("manualAddBtn").addEventListener("click", function(){
+    showConfirmSheet({}, null);
+  });
+
   function handleFileChosen(input){
     var file = input.files[0];
     if(!file) return;
@@ -570,10 +582,15 @@
   }
 
   function showLoading(){
-    var loadingSheet = document.getElementById("sheetLoading");
-    loadingSheet.style.display = "";
+    var loading = document.createElement("div");
+    loading.className = "sheet";
+    loading.innerHTML =
+      '<div class="spinner-wrap">' +
+        '<div class="spinner"></div>' +
+        '<p>正在辨識這張照片…</p>' +
+      '</div>';
     overlay.innerHTML = "";
-    overlay.appendChild(loadingSheet);
+    overlay.appendChild(loading);
     overlay.classList.add("show");
   }
 
@@ -608,13 +625,24 @@
     });
   }
 
+  function formatDatetimeLocal(date){
+    return date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2,"0") + "-" + String(date.getDate()).padStart(2,"0") +
+      "T" + String(date.getHours()).padStart(2,"0") + ":" + String(date.getMinutes()).padStart(2,"0");
+  }
+
+  function dateKeyFromDate(date){
+    return date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2,"0") + "-" + String(date.getDate()).padStart(2,"0");
+  }
+
   function showConfirmSheet(result, previewSrc){
+    result = result || {};
     var sheet = document.createElement("div");
     sheet.className = "sheet";
     sheet.innerHTML =
-      '<h2>確認這餐的紀錄</h2>' +
-      '<img class="sheet-preview" src="' + previewSrc + '">' +
-      '<div class="field"><label>食物名稱</label><input type="text" id="cf_name" value="' + escapeHtml(result.food_name || "") + '"></div>' +
+      '<h2>' + (previewSrc ? "確認這餐的紀錄" : "手動新增紀錄") + '</h2>' +
+      (previewSrc ? '<img class="sheet-preview" src="' + previewSrc + '">' : "") +
+      '<div class="field"><label>日期與時間</label><input type="datetime-local" id="cf_datetime" value="' + formatDatetimeLocal(new Date()) + '"></div>' +
+      '<div class="field"><label>食物名稱</label><input type="text" id="cf_name" value="' + escapeHtml(result.food_name || "") + '" placeholder="例如：滷肉飯"></div>' +
       '<div class="field"><label>估計熱量（kcal）</label><input type="number" id="cf_kcal" value="' + (result.calories != null ? result.calories : "") + '"></div>' +
       '<div class="field"><label>估計糖分（克）</label><input type="number" id="cf_sugar" value="' + (result.sugar_g != null ? result.sugar_g : "") + '"></div>' +
       '<div class="field"><label>備註（選填）</label><input type="text" id="cf_note" value="' + escapeHtml(result.note || "") + '"></div>' +
@@ -630,18 +658,28 @@
       overlay.classList.remove("show");
     });
     document.getElementById("cf_save").addEventListener("click", function(){
-      var now = new Date();
+      var dtValue = document.getElementById("cf_datetime").value;
+      var entryDate = dtValue ? new Date(dtValue) : new Date();
+      if(isNaN(entryDate.getTime())) entryDate = new Date();
+      var dateKey = dateKeyFromDate(entryDate);
+
       addEntry({
         id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
         food_name: document.getElementById("cf_name").value.trim() || "未命名餐點",
         calories: numOrNull(document.getElementById("cf_kcal").value),
         sugar_g: numOrNull(document.getElementById("cf_sugar").value),
         note: document.getElementById("cf_note").value.trim(),
-        time: String(now.getHours()).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0")
-      });
+        time: String(entryDate.getHours()).padStart(2,"0") + ":" + String(entryDate.getMinutes()).padStart(2,"0")
+      }, dateKey);
+
       overlay.classList.remove("show");
-      renderEntries();
-      renderSugar();
+
+      if(dateKey === todayKey()){
+        renderEntries();
+        renderSugar();
+      }else{
+        alert("已新增到 " + dateKey + " 的紀錄。目前清單只會顯示今天的紀錄，之後的「趨勢」頁會整合顯示歷史資料。");
+      }
     });
   }
 
