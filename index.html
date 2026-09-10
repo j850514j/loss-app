@@ -6,6 +6,9 @@
 <title>減脂記錄</title>
 <meta name="theme-color" content="#1F3D2B">
 <link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Iansui:wght@400&display=swap" rel="stylesheet">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -21,6 +24,7 @@
     --ok:#4C7A55;
     --ok-soft:#DEEBDF;
     --radius:14px;
+    --hand:'Iansui', cursive;
     font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", sans-serif;
   }
   *{box-sizing:border-box;}
@@ -31,10 +35,11 @@
     display:flex;
     flex-direction:column;
     padding-bottom:env(safe-area-inset-bottom);
+    background-image:repeating-linear-gradient(to bottom, transparent, transparent 31px, rgba(31,61,43,0.05) 32px);
   }
   h1,h2,h3{
-    font-family:Georgia,"Iowan Old Style","Noto Serif TC",serif;
-    font-weight:600;
+    font-family:var(--hand),Georgia,"Noto Serif TC",serif;
+    font-weight:400;
     margin:0;
   }
   .num{
@@ -47,7 +52,7 @@
     align-items:baseline;
     justify-content:space-between;
   }
-  header.top h1{font-size:22px;letter-spacing:0.02em;}
+  header.top h1{font-size:26px;letter-spacing:0.02em;transform:rotate(-1.2deg);display:inline-block;}
   header.top .date{font-size:13px;color:var(--muted);}
 
   main{
@@ -100,12 +105,13 @@
     border-radius:var(--radius);
     background:var(--ink);
     color:var(--paper);
-    padding:18px;
-    font-size:16px;
+    padding:16px;
+    font-size:18px;
+    font-family:var(--hand),inherit;
     display:flex;
     align-items:center;
     justify-content:center;
-    gap:10px;
+    gap:8px;
     margin-bottom:20px;
     cursor:pointer;
   }
@@ -116,7 +122,8 @@
 
   /* ---- Log list ---- */
   .section-title{
-    font-size:13px;
+    font-family:var(--hand),inherit;
+    font-size:16px;
     color:var(--muted);
     margin:4px 0 10px;
   }
@@ -133,7 +140,7 @@
   }
   .entry.high-sugar{border-left-color:var(--alert);}
   .entry .meta{flex:1;min-width:0;}
-  .entry .food{font-size:15px;margin-bottom:4px;}
+  .entry .food{font-family:var(--hand),inherit;font-size:17px;margin-bottom:4px;}
   .entry .time{font-size:12px;color:var(--muted);}
   .entry .stats{
     text-align:right;
@@ -199,7 +206,8 @@
     padding:13px;
     border-radius:10px;
     border:none;
-    font-size:15px;
+    font-size:16px;
+    font-family:var(--hand),inherit;
     cursor:pointer;
   }
   .btn.primary{background:var(--ink);color:var(--paper);}
@@ -211,12 +219,12 @@
     background:none;
     border:none;
     color:var(--muted);
-    font-size:13px;
+    font-family:var(--hand),inherit;
+    font-size:15px;
     text-decoration:underline;
     padding:0 0 20px;
     text-align:center;
     cursor:pointer;
-    font-family:inherit;
   }
 
   .spinner-wrap{
@@ -296,11 +304,11 @@
   <section class="page active" id="page-log">
     <div class="sugar-card">
       <div class="row">
-        <span class="label">今日添加糖攝取</span>
+        <span class="label">今天的糖</span>
         <span class="amount num"><span id="sugarToday">0</span><span> / <span id="sugarLimit">25</span> g</span></span>
       </div>
       <div class="gauge-track"><div class="gauge-fill" id="sugarGauge" style="width:0%"></div></div>
-      <p id="sugarMsg" style="font-size:13px;color:var(--muted);margin:10px 0 0;"></p>
+      <p id="sugarMsg" style="font-family:var(--hand),inherit;font-size:16px;color:var(--muted);margin:8px 0 0;"></p>
     </div>
 
     <div style="display:flex;gap:10px;margin-bottom:20px;">
@@ -315,8 +323,8 @@
     </div>
     <input type="file" id="fileInput" accept="image/*" capture="environment">
     <input type="file" id="libraryInput" accept="image/*">
-    <button class="link-btn" id="manualAddBtn">或手動輸入紀錄（也可以補之前的日期）</button>
-    <p class="hint" style="text-align:center;margin-top:-12px;">拍照或選相簿後，下一步可以修改日期時間，一樣能補記錄之前吃的東西</p>
+    <button class="link-btn" id="manualAddBtn">手動輸入</button>
+    <p class="hint" style="text-align:center;margin-top:-12px;">確認畫面可改日期，也能回補之前的紀錄</p>
 
     <div class="section-title">今天吃了什麼</div>
     <div id="entryList"></div>
@@ -326,7 +334,7 @@
   <section class="page" id="page-trend">
     <div class="placeholder-page">
       <h2>趨勢圖表</h2>
-      <p>體重、體脂變化趨勢功能<br>下一階段開發中。</p>
+      <p>體重、體脂趨勢<br>下一階段開發中</p>
     </div>
   </section>
 
@@ -338,7 +346,7 @@
         <label>Apps Script Web App 網址</label>
         <input type="text" id="apiUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
       </div>
-      <p class="hint">拍照辨識需要一個代理網址才能運作，請依照 README 部署你自己的 Google Apps Script，再把產生的網址貼在這裡。</p>
+      <p class="hint">貼上你部署的 Apps Script 網址才能使用拍照辨識，設定方法見 README。</p>
     </div>
 
     <div class="settings-group">
@@ -347,7 +355,7 @@
         <label>每日糖分上限（克）</label>
         <input type="number" id="sugarLimitInput" min="0" step="1">
       </div>
-      <p class="hint">預設 25 克，是世界衛生組織建議的每日添加糖上限，可依你自己的目標調整。</p>
+      <p class="hint">預設 25 克（WHO 建議上限），可自行調整。</p>
     </div>
 
     <button class="btn primary" id="saveSettingsBtn" style="width:100%;margin-bottom:8px;">儲存設定</button>
@@ -465,7 +473,7 @@
     var list = document.getElementById("entryList");
     list.innerHTML = "";
     if(entries.length === 0){
-      list.innerHTML = '<div class="empty-state">還沒有紀錄，拍張照片開始吧</div>';
+      list.innerHTML = '<div class="empty-state">還沒紀錄，拍張照開始吧</div>';
       return;
     }
     entries.forEach(function(e){
