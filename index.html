@@ -296,7 +296,7 @@
   <section class="page active" id="page-log">
     <div class="sugar-card">
       <div class="row">
-        <span class="label">今日糖分攝取</span>
+        <span class="label">今日添加糖攝取</span>
         <span class="amount num"><span id="sugarToday">0</span><span> / <span id="sugarLimit">25</span> g</span></span>
       </div>
       <div class="gauge-track"><div class="gauge-fill" id="sugarGauge" style="width:0%"></div></div>
@@ -315,6 +315,7 @@
     <input type="file" id="fileInput" accept="image/*" capture="environment">
     <input type="file" id="libraryInput" accept="image/*">
     <button class="link-btn" id="manualAddBtn">或手動輸入紀錄（也可以補之前的日期）</button>
+    <p class="hint" style="text-align:center;margin-top:-12px;">拍照或選相簿後，下一步可以修改日期時間，一樣能補記錄之前吃的東西</p>
 
     <div class="section-title">今天吃了什麼</div>
     <div id="entryList"></div>
@@ -644,7 +645,7 @@
       '<div class="field"><label>日期與時間</label><input type="datetime-local" id="cf_datetime" value="' + formatDatetimeLocal(new Date()) + '"></div>' +
       '<div class="field"><label>食物名稱</label><input type="text" id="cf_name" value="' + escapeHtml(result.food_name || "") + '" placeholder="例如：滷肉飯"></div>' +
       '<div class="field"><label>估計熱量（kcal）</label><input type="number" id="cf_kcal" value="' + (result.calories != null ? result.calories : "") + '"></div>' +
-      '<div class="field"><label>估計糖分（克）</label><input type="number" id="cf_sugar" value="' + (result.sugar_g != null ? result.sugar_g : "") + '"></div>' +
+      '<div class="field"><label>估計添加糖（克，天然水果/乳製品填 0）</label><input type="number" id="cf_sugar" value="' + (result.sugar_g != null ? result.sugar_g : "") + '"></div>' +
       '<div class="field"><label>備註（選填）</label><input type="text" id="cf_note" value="' + escapeHtml(result.note || "") + '"></div>' +
       '<div class="sheet-actions">' +
         '<button class="btn ghost" id="cf_cancel">取消</button>' +

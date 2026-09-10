@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fatloss-shell-v7';
+const CACHE_NAME = 'fatloss-shell-v9';
 const SHELL_FILES = [
   './',
   './index.html',
