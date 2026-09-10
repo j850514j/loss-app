@@ -300,6 +300,7 @@
         <span class="amount num"><span id="sugarToday">0</span><span> / <span id="sugarLimit">25</span> g</span></span>
       </div>
       <div class="gauge-track"><div class="gauge-fill" id="sugarGauge" style="width:0%"></div></div>
+      <p id="sugarMsg" style="font-size:13px;color:var(--muted);margin:10px 0 0;"></p>
     </div>
 
     <div style="display:flex;gap:10px;margin-bottom:20px;">
@@ -441,6 +442,22 @@
     var fill = document.getElementById("sugarGauge");
     fill.style.width = pct + "%";
     fill.classList.toggle("warn", total > limit);
+
+    var msgEl = document.getElementById("sugarMsg");
+    var ratio = limit > 0 ? total / limit : 0;
+    var msg;
+    if(entries.length === 0){
+      msg = "今天還沒記錄，先拍張照開始吧";
+    }else if(total > limit){
+      msg = "欸，糖分已經超標囉，明天再拉回來就好，別給自己太大壓力";
+    }else if(ratio >= 0.8){
+      msg = "快到今天的額度了，晚一點的餐盡量清淡一點";
+    }else if(ratio >= 0.5){
+      msg = "吃到一半的量了，還有空間，維持這個節奏";
+    }else{
+      msg = "目前控制得不錯，繼續保持";
+    }
+    msgEl.textContent = msg;
   }
 
   function renderEntries(){
