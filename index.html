@@ -227,6 +227,54 @@
     cursor:pointer;
   }
 
+  @keyframes popIn{
+    0%{ transform:scale(0.5) translateY(6px); opacity:0; }
+    65%{ transform:scale(1.08); opacity:1; }
+    100%{ transform:scale(1); }
+  }
+  .badge-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:-8px 0 18px;
+  }
+  .badge{
+    background:var(--ok-soft);
+    color:var(--ink);
+    border-radius:999px;
+    padding:6px 13px;
+    font-size:13px;
+    font-family:var(--hand),inherit;
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    animation:popIn .35s ease;
+    white-space:nowrap;
+  }
+
+  .toast{
+    position:fixed;
+    top:calc(env(safe-area-inset-top) + 14px);
+    left:50%;
+    transform:translateX(-50%) scale(0.85);
+    background:var(--ink);
+    color:var(--paper);
+    padding:10px 20px;
+    border-radius:999px;
+    font-family:var(--hand),inherit;
+    font-size:16px;
+    opacity:0;
+    pointer-events:none;
+    z-index:80;
+    transition:opacity .25s ease, transform .25s ease;
+    white-space:nowrap;
+    box-shadow:0 6px 18px rgba(31,61,43,0.25);
+  }
+  .toast.show{
+    opacity:1;
+    transform:translateX(-50%) scale(1);
+  }
+
   .spinner-wrap{
     display:flex;flex-direction:column;align-items:center;gap:14px;
     padding:30px 10px 10px;
@@ -298,6 +346,32 @@
   <div class="date num" id="todayLabel"></div>
 </header>
 
+<div style="padding:0 20px 6px;max-width:480px;margin:0 auto;">
+  <svg viewBox="0 0 400 120" style="width:100%;height:auto;max-height:110px;display:block;" xmlns="http://www.w3.org/2000/svg">
+    <!-- steam -->
+    <path d="M150,34 Q145,24 152,16 Q159,8 154,0" fill="none" stroke="var(--line)" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M172,34 Q167,22 175,14 Q183,6 177,-2" fill="none" stroke="var(--line)" stroke-width="2.5" stroke-linecap="round" transform="translate(0,4)"/>
+    <!-- bowl -->
+    <path d="M118,44 Q112,44 113,50 Q117,86 160,88 Q203,86 207,50 Q208,44 202,44 Z" fill="var(--card)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>
+    <ellipse cx="160" cy="44" rx="47" ry="7" fill="var(--card)" stroke="var(--ink)" stroke-width="3"/>
+    <circle cx="145" cy="45" r="4" fill="var(--ok)"/>
+    <circle cx="163" cy="47" r="4" fill="var(--alert)"/>
+    <circle cx="178" cy="44" r="4" fill="var(--ok)"/>
+    <!-- little sprout leaf on the bowl -->
+    <path d="M158,44 Q158,30 170,26 Q162,38 158,44Z" fill="var(--ok)" opacity="0.85"/>
+    <!-- apple -->
+    <path d="M280,42 Q266,42 263,58 Q260,78 278,86 Q292,92 300,86 Q318,78 315,58 Q312,42 298,42 Q289,36 280,42Z" fill="var(--card)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M289,42 Q290,32 298,28" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
+    <path d="M296,30 Q305,26 310,32 Q302,32 296,30Z" fill="var(--ok)"/>
+    <circle cx="284" cy="60" r="3" fill="var(--alert)" opacity="0.55"/>
+    <!-- scatter crumbs -->
+    <circle cx="90" cy="90" r="3" fill="var(--muted)" opacity="0.4"/>
+    <circle cx="330" cy="78" r="3" fill="var(--muted)" opacity="0.4"/>
+    <circle cx="105" cy="72" r="2" fill="var(--muted)" opacity="0.3"/>
+    <circle cx="340" cy="60" r="2" fill="var(--muted)" opacity="0.3"/>
+  </svg>
+</div>
+
 <main>
 
   <!-- 飲食紀錄頁 -->
@@ -310,6 +384,17 @@
       <div class="gauge-track"><div class="gauge-fill" id="sugarGauge" style="width:0%"></div></div>
       <p id="sugarMsg" style="font-family:var(--hand),inherit;font-size:16px;color:var(--muted);margin:8px 0 0;"></p>
     </div>
+
+    <div class="sugar-card">
+      <div class="row">
+        <span class="label">今天的蛋白質</span>
+        <span class="amount num"><span id="proteinToday">0</span><span> / <span id="proteinGoal">90</span> g</span></span>
+      </div>
+      <div class="gauge-track"><div class="gauge-fill" id="proteinGauge" style="width:0%;background:var(--ok);"></div></div>
+      <p id="proteinMsg" style="font-family:var(--hand),inherit;font-size:16px;color:var(--muted);margin:8px 0 0;"></p>
+    </div>
+
+    <div class="badge-row" id="badgeRow" style="display:none;"></div>
 
     <div style="display:flex;gap:10px;margin-bottom:20px;">
       <button class="capture-btn" id="captureBtn" style="margin-bottom:0;">
@@ -358,6 +443,15 @@
       <p class="hint">預設 25 克（WHO 建議上限），可自行調整。</p>
     </div>
 
+    <div class="settings-group">
+      <h3>蛋白質目標</h3>
+      <div class="field">
+        <label>每日蛋白質目標（克）</label>
+        <input type="number" id="proteinGoalInput" min="0" step="1">
+      </div>
+      <p class="hint">預設 90 克，可依自己的體重與目標調整。</p>
+    </div>
+
     <button class="btn primary" id="saveSettingsBtn" style="width:100%;margin-bottom:8px;">儲存設定</button>
     <div class="save-msg" id="saveMsg"></div>
   </section>
@@ -381,6 +475,7 @@
 
 <!-- 辨識中 / 確認結果 sheet -->
 <div class="overlay" id="overlay"></div>
+<div class="toast" id="toast"></div>
 
 <script>
 (function(){
@@ -389,7 +484,8 @@
   var STORAGE_KEYS = {
     entries: "fatloss_entries_v1",
     apiUrl: "fatloss_api_url_v1",
-    sugarLimit: "fatloss_sugar_limit_v1"
+    sugarLimit: "fatloss_sugar_limit_v1",
+    proteinGoal: "fatloss_protein_goal_v1"
   };
 
   function todayKey(){
@@ -428,8 +524,66 @@
     var v = parseFloat(localStorage.getItem(STORAGE_KEYS.sugarLimit));
     return isNaN(v) ? 25 : v;
   }
+  function getProteinGoal(){
+    var v = parseFloat(localStorage.getItem(STORAGE_KEYS.proteinGoal));
+    return isNaN(v) ? 90 : v;
+  }
   function getApiUrl(){
     return localStorage.getItem(STORAGE_KEYS.apiUrl) || "";
+  }
+
+  function dateKeyFromDateObj(date){
+    return date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2,"0") + "-" + String(date.getDate()).padStart(2,"0");
+  }
+
+  function computeSugarStreak(){
+    var all = loadEntries();
+    var limit = getSugarLimit();
+    var streak = 0;
+    var d = new Date();
+    while(true){
+      var key = dateKeyFromDateObj(d);
+      var dayEntries = all[key];
+      if(!dayEntries || dayEntries.length === 0) break;
+      var total = dayEntries.reduce(function(s,e){ return s + (Number(e.sugar_g)||0); }, 0);
+      if(total > limit) break;
+      streak++;
+      d.setDate(d.getDate() - 1);
+    }
+    return streak;
+  }
+
+  function renderBadges(){
+    var entries = getTodayEntries();
+    var badges = [];
+    if(entries.length > 0){
+      var totalSugar = entries.reduce(function(s,e){ return s + (Number(e.sugar_g)||0); }, 0);
+      var totalProtein = entries.reduce(function(s,e){ return s + (Number(e.protein_g)||0); }, 0);
+      var limit = getSugarLimit();
+      var goal = getProteinGoal();
+      if(totalSugar <= limit) badges.push("🎯 糖分達標");
+      if(totalSugar === 0) badges.push("🍎 零添加糖");
+      if(totalProtein >= goal) badges.push("💪 蛋白質達標");
+      var streak = computeSugarStreak();
+      if(streak >= 2) badges.push("🔥 連續 " + streak + " 天控糖");
+    }
+    var row = document.getElementById("badgeRow");
+    if(badges.length === 0){
+      row.style.display = "none";
+      row.innerHTML = "";
+      return;
+    }
+    row.style.display = "flex";
+    row.innerHTML = badges.map(function(b){ return '<span class="badge">' + b + '</span>'; }).join("");
+  }
+
+  var CELEBRATE_MESSAGES = ["✏️ 記上一筆！", "📝 收到，記好了！", "✅ 這餐記好了", "🎉 又完成一筆紀錄", "👍 好，寫進小本本了"];
+  function showToast(text){
+    var toast = document.getElementById("toast");
+    toast.textContent = text || CELEBRATE_MESSAGES[Math.floor(Math.random()*CELEBRATE_MESSAGES.length)];
+    toast.classList.add("show");
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(function(){ toast.classList.remove("show"); }, 1400);
   }
 
   // ---------- render ----------
@@ -468,6 +622,30 @@
     msgEl.textContent = msg;
   }
 
+  function renderProtein(){
+    var entries = getTodayEntries();
+    var total = entries.reduce(function(sum, e){ return sum + (Number(e.protein_g)||0); }, 0);
+    var goal = getProteinGoal();
+    document.getElementById("proteinToday").textContent = Math.round(total*10)/10;
+    document.getElementById("proteinGoal").textContent = goal;
+    var pct = goal > 0 ? Math.min(100, (total/goal)*100) : 0;
+    document.getElementById("proteinGauge").style.width = pct + "%";
+
+    var msgEl = document.getElementById("proteinMsg");
+    var ratio = goal > 0 ? total / goal : 0;
+    var msg;
+    if(entries.length === 0){
+      msg = "今天的蛋白質還沒開始記錄";
+    }else if(ratio >= 1){
+      msg = "蛋白質達標了，很讚";
+    }else if(ratio >= 0.6){
+      msg = "快到目標了，再加一份蛋白質來源";
+    }else{
+      msg = "蛋白質攝取還不夠，找機會補一點";
+    }
+    msgEl.textContent = msg;
+  }
+
   function renderEntries(){
     var entries = getTodayEntries();
     var list = document.getElementById("entryList");
@@ -486,7 +664,7 @@
         '</div>' +
         '<div class="stats">' +
           '<div class="kcal num">' + (e.calories!=null ? e.calories + " kcal" : "—") + '</div>' +
-          '<div class="num">糖 ' + (e.sugar_g!=null ? e.sugar_g + "g" : "—") + '</div>' +
+          '<div class="num">蛋 ' + (e.protein_g!=null ? e.protein_g + "g" : "—") + ' · 糖 ' + (e.sugar_g!=null ? e.sugar_g + "g" : "—") + '</div>' +
         '</div>' +
         '<button class="del" data-id="' + e.id + '" aria-label="刪除">×</button>';
       list.appendChild(row);
@@ -496,6 +674,8 @@
         deleteEntry(btn.getAttribute("data-id"));
         renderEntries();
         renderSugar();
+        renderProtein();
+        renderBadges();
       });
     });
   }
@@ -520,13 +700,18 @@
   function loadSettingsForm(){
     document.getElementById("apiUrlInput").value = getApiUrl();
     document.getElementById("sugarLimitInput").value = getSugarLimit();
+    document.getElementById("proteinGoalInput").value = getProteinGoal();
   }
   document.getElementById("saveSettingsBtn").addEventListener("click", function(){
     var url = document.getElementById("apiUrlInput").value.trim();
     var limit = parseFloat(document.getElementById("sugarLimitInput").value);
+    var goal = parseFloat(document.getElementById("proteinGoalInput").value);
     localStorage.setItem(STORAGE_KEYS.apiUrl, url);
     localStorage.setItem(STORAGE_KEYS.sugarLimit, isNaN(limit) ? 25 : limit);
+    localStorage.setItem(STORAGE_KEYS.proteinGoal, isNaN(goal) ? 90 : goal);
     renderSugar();
+    renderProtein();
+    renderBadges();
     var msg = document.getElementById("saveMsg");
     msg.textContent = "已儲存";
     setTimeout(function(){ msg.textContent = ""; }, 1800);
@@ -670,7 +855,8 @@
       '<div class="field"><label>日期與時間</label><input type="datetime-local" id="cf_datetime" value="' + formatDatetimeLocal(new Date()) + '"></div>' +
       '<div class="field"><label>食物名稱</label><input type="text" id="cf_name" value="' + escapeHtml(result.food_name || "") + '" placeholder="例如：滷肉飯"></div>' +
       '<div class="field"><label>估計熱量（kcal）</label><input type="number" id="cf_kcal" value="' + (result.calories != null ? result.calories : "") + '"></div>' +
-      '<div class="field"><label>估計添加糖（克，天然水果/乳製品填 0）</label><input type="number" id="cf_sugar" value="' + (result.sugar_g != null ? result.sugar_g : "") + '"></div>' +
+      '<div class="field"><label>估計蛋白質（克）</label><input type="number" id="cf_protein" value="' + (result.protein_g != null ? result.protein_g : "") + '"></div>' +
+      '<div class="field"><label>估計添加糖（克，天然水果/蔬菜/乳製品填 0）</label><input type="number" id="cf_sugar" value="' + (result.sugar_g != null ? result.sugar_g : "") + '"></div>' +
       '<div class="field"><label>備註（選填）</label><input type="text" id="cf_note" value="' + escapeHtml(result.note || "") + '"></div>' +
       '<div class="sheet-actions">' +
         '<button class="btn ghost" id="cf_cancel">取消</button>' +
@@ -693,6 +879,7 @@
         id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
         food_name: document.getElementById("cf_name").value.trim() || "未命名餐點",
         calories: numOrNull(document.getElementById("cf_kcal").value),
+        protein_g: numOrNull(document.getElementById("cf_protein").value),
         sugar_g: numOrNull(document.getElementById("cf_sugar").value),
         note: document.getElementById("cf_note").value.trim(),
         time: String(entryDate.getHours()).padStart(2,"0") + ":" + String(entryDate.getMinutes()).padStart(2,"0")
@@ -703,6 +890,9 @@
       if(dateKey === todayKey()){
         renderEntries();
         renderSugar();
+        renderProtein();
+        renderBadges();
+        showToast();
       }else{
         alert("已新增到 " + dateKey + " 的紀錄。目前清單只會顯示今天的紀錄，之後的「趨勢」頁會整合顯示歷史資料。");
       }
@@ -717,6 +907,8 @@
   // ---------- init ----------
   renderDate();
   renderSugar();
+  renderProtein();
+  renderBadges();
   renderEntries();
   loadSettingsForm();
 
