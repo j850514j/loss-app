@@ -67,45 +67,85 @@
   .page{display:none;}
   .page.active{display:block;}
 
-  /* ---- Sugar summary gauge ---- */
-  .sugar-card{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:var(--radius);
-    padding:18px 18px 16px;
-    margin-bottom:18px;
+  /* ---- 3D floating card ---- */
+  @keyframes floatIn{
+    0%  { opacity:0; transform:translateY(22px) scale(0.96); }
+    60% { opacity:1; transform:translateY(-3px) scale(1.005); }
+    100%{ opacity:1; transform:translateY(0) scale(1); }
   }
+
+  .sugar-card{
+    background:linear-gradient(155deg,#ffffff 55%,#f3f6f0 100%);
+    border:none;
+    border-radius:20px;
+    padding:20px 20px 18px;
+    margin-bottom:18px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.95) inset,
+      0 -1px 0 rgba(31,61,43,0.06) inset,
+      0 4px 0 #d5ddd0,
+      0 8px 20px rgba(31,61,43,0.10),
+      0 2px 6px rgba(31,61,43,0.07);
+    animation: floatIn .5s cubic-bezier(0.34,1.2,0.64,1) both;
+    position:relative;
+  }
+  .sugar-card::before{
+    content:'';
+    position:absolute;
+    top:0; left:16px; right:16px; height:1px;
+    background:rgba(255,255,255,0.9);
+    border-radius:99px;
+  }
+  .sugar-card:nth-child(1){ animation-delay:.05s; }
+  .sugar-card:nth-child(2){ animation-delay:.15s; }
   .sugar-card .row{
     display:flex;
     justify-content:space-between;
     align-items:baseline;
-    margin-bottom:10px;
+    margin-bottom:12px;
   }
   .sugar-card .label{font-size:14px;color:var(--muted);}
-  .sugar-card .amount{font-size:26px;}
+  .sugar-card .amount{font-size:28px;letter-spacing:-0.01em;}
   .sugar-card .amount span{font-size:14px;color:var(--muted);font-family:inherit;}
+
+  /* 3D capsule gauge */
   .gauge-track{
-    height:8px;
+    height:14px;
     border-radius:99px;
-    background:var(--line);
-    overflow:hidden;
+    background:linear-gradient(to bottom,#dde4d7,#eaede6);
+    box-shadow:0 3px 6px rgba(31,61,43,0.12) inset, 0 1px 0 rgba(255,255,255,0.8);
+    overflow:visible;
+    position:relative;
   }
   .gauge-fill{
     height:100%;
-    background:var(--ok);
     border-radius:99px;
-    transition:width .35s ease, background .35s ease;
+    background:linear-gradient(to bottom,#7bc27e 0%,#4C7A55 55%,#3a6044 100%);
+    box-shadow:0 2px 8px rgba(76,122,85,0.45), 0 1px 0 rgba(255,255,255,0.25) inset;
+    transition:width .55s cubic-bezier(0.34,1.2,0.64,1), background .4s ease;
+    position:relative;
+    overflow:hidden;
   }
-  .gauge-fill.warn{background:var(--alert);}
+  .gauge-fill::after{
+    content:'';
+    position:absolute;
+    top:2px; left:8px; right:8px; height:4px;
+    border-radius:99px;
+    background:rgba(255,255,255,0.32);
+  }
+  .gauge-fill.warn{
+    background:linear-gradient(to bottom,#e0726c 0%,#C1443D 55%,#9e342d 100%);
+    box-shadow:0 2px 8px rgba(193,68,61,0.45), 0 1px 0 rgba(255,255,255,0.25) inset;
+  }
 
-  /* ---- Capture button ---- */
+  /* ---- 3D Capture button ---- */
   .capture-btn{
     width:100%;
     border:none;
     border-radius:var(--radius);
-    background:var(--ink);
+    background:linear-gradient(to bottom,#2a5038 0%,#1F3D2B 60%,#162d1f 100%);
     color:var(--paper);
-    padding:16px;
+    padding:17px;
     font-size:18px;
     font-family:var(--hand),inherit;
     display:flex;
@@ -114,11 +154,68 @@
     gap:8px;
     margin-bottom:20px;
     cursor:pointer;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.12) inset,
+      0 5px 0 #0f1f13,
+      0 8px 18px rgba(15,31,19,0.35);
+    transform:translateY(0);
+    transition:transform .1s ease, box-shadow .1s ease;
+    position:relative;
   }
-  .capture-btn:active{opacity:.85;}
+  .capture-btn:active{
+    transform:translateY(4px);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.12) inset,
+      0 1px 0 #0f1f13,
+      0 3px 8px rgba(15,31,19,0.25);
+  }
+  .capture-btn.ghost-btn{
+    background:linear-gradient(to bottom,#ffffff,#f5f5f2);
+    color:var(--ink);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.9) inset,
+      0 5px 0 #c8cec3,
+      0 8px 18px rgba(31,61,43,0.12);
+  }
+  .capture-btn.ghost-btn:active{
+    transform:translateY(4px);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.9) inset,
+      0 1px 0 #c8cec3,
+      0 3px 8px rgba(31,61,43,0.08);
+  }
   .capture-btn svg{width:22px;height:22px;flex-shrink:0;}
 
   input[type=file]{display:none;}
+
+  /* ---- 3D hero banner ---- */
+  @keyframes heroFloat{
+    0%,100%{ transform:translateY(0); }
+    50%{ transform:translateY(-5px); }
+  }
+  .hero-3d{
+    text-align:center;
+    margin:-4px 0 10px;
+    animation:floatIn .6s cubic-bezier(0.34,1.2,0.64,1) both;
+  }
+  .hero-plate{
+    display:inline-block;
+    position:relative;
+    animation:heroFloat 4s ease-in-out infinite;
+    filter:drop-shadow(0 12px 18px rgba(31,61,43,0.18)) drop-shadow(0 4px 6px rgba(31,61,43,0.12));
+  }
+  .plate-svg{
+    width:200px;
+    height:auto;
+    display:block;
+  }
+  .hero-label{
+    font-family:var(--hand),inherit;
+    font-size:17px;
+    color:var(--muted);
+    margin-top:2px;
+    letter-spacing:0.02em;
+  }
 
   /* ---- Log list ---- */
   .section-title{
@@ -128,15 +225,20 @@
     margin:4px 0 10px;
   }
   .entry{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-left:3px solid var(--ok);
-    border-radius:10px;
-    padding:12px 14px;
+    background:linear-gradient(155deg,#ffffff 60%,#f7f9f5 100%);
+    border:none;
+    border-left:4px solid var(--ok);
+    border-radius:12px;
+    padding:13px 14px;
     margin-bottom:10px;
     display:flex;
     justify-content:space-between;
     gap:10px;
+    box-shadow:
+      0 3px 0 #d4ddd0,
+      0 5px 14px rgba(31,61,43,0.08),
+      0 1px 3px rgba(31,61,43,0.05);
+    animation:floatIn .4s cubic-bezier(0.34,1.2,0.64,1) both;
   }
   .entry.high-sugar{border-left-color:var(--alert);}
   .entry .meta{flex:1;min-width:0;}
@@ -275,6 +377,173 @@
     transform:translateX(-50%) scale(1);
   }
 
+  .chart-wrap{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:12px 10px 8px;
+    margin-bottom:18px;
+  }
+  .chart-wrap svg{width:100%;height:130px;display:block;}
+  .chart-empty{
+    text-align:center;
+    color:var(--muted);
+    font-family:var(--hand),inherit;
+    font-size:15px;
+    padding:34px 10px;
+  }
+
+  /* ---- Color food strip (home + result) ---- */
+  .color-strip-wrap{
+    margin: 0 0 20px;
+    animation:floatIn .5s cubic-bezier(0.34,1.2,0.64,1) both;
+    animation-delay:.25s;
+  }
+  .color-strip-title{
+    font-family:var(--hand),inherit;
+    font-size:15px;
+    color:var(--muted);
+    margin-bottom:8px;
+  }
+  .color-strip{
+    display:flex;
+    height:24px;
+    border-radius:99px;
+    overflow:hidden;
+    box-shadow:0 3px 8px rgba(31,61,43,0.13) inset, 0 1px 0 rgba(255,255,255,0.6);
+    background:var(--line);
+    position:relative;
+  }
+  .color-segment{
+    flex-shrink:0;
+    position:relative;
+    overflow:hidden;
+    transition:flex .6s cubic-bezier(0.34,1.2,0.64,1);
+    min-width:6px;
+  }
+  .color-segment::after{
+    content:'';
+    position:absolute;
+    top:3px;left:6px;right:6px;height:5px;
+    border-radius:99px;
+    background:rgba(255,255,255,0.28);
+  }
+  .color-dominant{
+    font-family:var(--hand),inherit;
+    font-size:14px;
+    color:var(--muted);
+    margin-top:7px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .color-dominant-dot{
+    width:10px;height:10px;
+    border-radius:50%;
+    flex-shrink:0;
+    box-shadow:0 1px 4px rgba(0,0,0,0.18);
+  }
+
+  /* ---- Result sheet (after saving) ---- */
+  .result-hero{
+    text-align:center;
+    padding:6px 0 18px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:18px;
+  }
+  .result-food-name{
+    font-family:var(--hand),inherit;
+    font-size:21px;
+    margin-bottom:4px;
+    line-height:1.3;
+  }
+  .result-kcal{
+    font-family:ui-monospace,"SF Mono",Menlo,monospace;
+    font-size:36px;
+    letter-spacing:-0.02em;
+    color:var(--ink);
+    line-height:1;
+  }
+  .result-kcal small{
+    font-size:14px;
+    color:var(--muted);
+    font-weight:400;
+    letter-spacing:0;
+  }
+  .result-macro{margin-bottom:16px;}
+  .result-macro-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:7px;
+  }
+  .result-macro-label{font-size:14px;color:var(--muted);}
+  .result-macro-delta{
+    font-family:ui-monospace,"SF Mono",Menlo,monospace;
+    font-size:20px;
+    font-weight:600;
+  }
+  .result-macro-delta.p-delta{color:var(--ok);}
+  .result-macro-delta.s-delta{color:#d4a030;}
+  .result-macro-delta.s-over{color:var(--alert);}
+  .result-bar-track{
+    height:14px;
+    border-radius:99px;
+    background:linear-gradient(to bottom,#dde4d7,#eaede6);
+    box-shadow:0 3px 6px rgba(31,61,43,0.12) inset, 0 1px 0 rgba(255,255,255,0.8);
+    overflow:hidden;
+    margin-bottom:5px;
+    position:relative;
+  }
+  .result-bar-fill{
+    height:100%;
+    border-radius:99px;
+    position:relative;
+    overflow:hidden;
+    width:0%;
+    transition:width .7s cubic-bezier(0.34,1.1,0.64,1);
+  }
+  .result-bar-fill::after{
+    content:'';position:absolute;
+    top:2px;left:8px;right:8px;height:4px;
+    border-radius:99px;background:rgba(255,255,255,0.32);
+  }
+  .result-bar-fill.pf{
+    background:linear-gradient(to bottom,#7bc27e 0%,#4C7A55 55%,#3a6044 100%);
+    box-shadow:0 2px 8px rgba(76,122,85,0.45);
+  }
+  .result-bar-fill.sf-ok{
+    background:linear-gradient(to bottom,#f0c070 0%,#d4a030 55%,#b88020 100%);
+    box-shadow:0 2px 8px rgba(212,160,48,0.4);
+  }
+  .result-bar-fill.sf-over{
+    background:linear-gradient(to bottom,#e87070 0%,#C1443D 55%,#9e342d 100%);
+    box-shadow:0 2px 8px rgba(193,68,61,0.45);
+  }
+  .result-macro-info{
+    display:flex;
+    justify-content:space-between;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .result-macro-remain{color:var(--ink);}
+  .result-macro-over{color:var(--alert);}
+  .result-macro-done{color:var(--ok);}
+  .week-row{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:10px 14px;
+    margin-bottom:8px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+  }
+  .week-row .day{font-family:var(--hand),inherit;font-size:16px;}
+  .week-row .vals{font-size:13px;color:var(--muted);white-space:nowrap;}
+  .week-row.over .vals{color:var(--alert);}
+
   .spinner-wrap{
     display:flex;flex-direction:column;align-items:center;gap:14px;
     padding:30px 10px 10px;
@@ -376,6 +645,41 @@
 
   <!-- 飲食紀錄頁 -->
   <section class="page active" id="page-log">
+
+    <!-- 3D hero banner -->
+    <div class="hero-3d" aria-hidden="true">
+      <div class="hero-plate">
+        <div class="hero-shadow"></div>
+        <svg class="plate-svg" viewBox="0 0 220 120" xmlns="http://www.w3.org/2000/svg">
+          <!-- plate base (isometric-ish ellipse) -->
+          <ellipse cx="110" cy="96" rx="90" ry="18" fill="rgba(31,61,43,0.08)"/>
+          <ellipse cx="110" cy="90" rx="86" ry="16" fill="#e8ede3"/>
+          <ellipse cx="110" cy="86" rx="86" ry="16" fill="#f0f4ec"/>
+          <!-- bowl body -->
+          <path d="M 38 60 Q 40 100 110 102 Q 180 100 182 60 Z" fill="#fff" stroke="#d0d8cc" stroke-width="1.2"/>
+          <path d="M 38 60 Q 40 100 110 102 Q 180 100 182 60" fill="none" stroke="#c8d0c4" stroke-width="1"/>
+          <!-- bowl rim 3D top -->
+          <ellipse cx="110" cy="60" rx="72" ry="14" fill="#fafcf8" stroke="#c8d0c4" stroke-width="1.2"/>
+          <ellipse cx="110" cy="60" rx="66" ry="11" fill="#f0f5ee"/>
+          <!-- food items floating above bowl -->
+          <!-- broccoli -->
+          <circle cx="85" cy="48" r="10" fill="#4C7A55" opacity="0.9"/>
+          <circle cx="78" cy="52" r="7" fill="#4C7A55" opacity="0.85"/>
+          <circle cx="92" cy="52" r="7" fill="#3a6044" opacity="0.85"/>
+          <rect x="83" y="56" width="4" height="8" rx="2" fill="#2f5237"/>
+          <!-- egg -->
+          <ellipse cx="118" cy="50" rx="11" ry="9" fill="#fff" stroke="#e8dfc0" stroke-width="1"/>
+          <circle cx="118" cy="51" r="5" fill="#f5c842"/>
+          <!-- salmon piece -->
+          <path d="M136 52 Q150 44 162 52 Q155 62 142 62 Z" fill="#e87b5a"/>
+          <path d="M140 54 Q150 49 158 53" stroke="rgba(255,255,255,0.5)" stroke-width="1" fill="none"/>
+          <!-- highlight on bowl rim -->
+          <ellipse cx="80" cy="57" rx="16" ry="3" fill="rgba(255,255,255,0.6)" transform="rotate(-10,80,57)"/>
+        </svg>
+      </div>
+      <div class="hero-label">今天吃得怎樣？</div>
+    </div>
+
     <div class="sugar-card">
       <div class="row">
         <span class="label">今天的糖</span>
@@ -395,13 +699,14 @@
     </div>
 
     <div class="badge-row" id="badgeRow" style="display:none;"></div>
+    <div class="color-strip-wrap" id="colorStripHome" style="display:none;"></div>
 
     <div style="display:flex;gap:10px;margin-bottom:20px;">
       <button class="capture-btn" id="captureBtn" style="margin-bottom:0;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.4"/></svg>
         拍照
       </button>
-      <button class="capture-btn" id="libraryBtn" style="margin-bottom:0;background:var(--card);color:var(--ink);border:1px solid var(--line);">
+      <button class="capture-btn ghost-btn" id="libraryBtn" style="margin-bottom:0;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-4 4-2-2-6 6"/></svg>
         從相簿選擇
       </button>
@@ -417,10 +722,30 @@
 
   <!-- 趨勢頁（之後開發） -->
   <section class="page" id="page-trend">
-    <div class="placeholder-page">
-      <h2>趨勢圖表</h2>
-      <p>體重、體脂趨勢<br>下一階段開發中</p>
+    <div class="sugar-card">
+      <div class="row">
+        <span class="label">最新數字</span>
+        <span class="amount num" id="latestStat">—</span>
+      </div>
+      <p id="statDelta" style="font-family:var(--hand),inherit;font-size:16px;color:var(--muted);margin:8px 0 0;"></p>
     </div>
+
+    <button class="capture-btn" id="addMeasureBtn">記今天的體重體脂</button>
+
+    <div class="section-title">體重</div>
+    <div class="chart-wrap"><svg id="weightChart" viewBox="0 0 320 130" preserveAspectRatio="none"></svg></div>
+
+    <div class="section-title">體脂率</div>
+    <div class="chart-wrap"><svg id="fatChart" viewBox="0 0 320 130" preserveAspectRatio="none"></svg></div>
+
+    <div class="section-title">這 7 天</div>
+    <div id="weekSummary"></div>
+
+    <div class="section-title">翻翻過去的紀錄</div>
+    <div class="field" style="margin-bottom:12px;">
+      <input type="date" id="historyDate">
+    </div>
+    <div id="historyList"></div>
   </section>
 
   <!-- 設定頁 -->
@@ -485,8 +810,26 @@
     entries: "fatloss_entries_v1",
     apiUrl: "fatloss_api_url_v1",
     sugarLimit: "fatloss_sugar_limit_v1",
-    proteinGoal: "fatloss_protein_goal_v1"
+    proteinGoal: "fatloss_protein_goal_v1",
+    measures: "fatloss_measures_v1"
   };
+
+  function loadMeasures(){
+    try{
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.measures) || "{}");
+    }catch(e){ return {}; }
+  }
+  function saveMeasure(dateKey, weight, fat){
+    var all = loadMeasures();
+    all[dateKey] = { weight: weight, fat: fat };
+    localStorage.setItem(STORAGE_KEYS.measures, JSON.stringify(all));
+  }
+  function measuresSorted(){
+    var all = loadMeasures();
+    return Object.keys(all).sort().map(function(k){
+      return { date: k, weight: all[k].weight, fat: all[k].fat };
+    });
+  }
 
   function todayKey(){
     var d = new Date();
@@ -692,7 +1035,9 @@
       document.querySelectorAll("nav.bottom button").forEach(function(b){ b.classList.remove("active"); });
       btn.classList.add("active");
       document.querySelectorAll(".page").forEach(function(p){ p.classList.remove("active"); });
-      document.getElementById("page-" + btn.getAttribute("data-page")).classList.add("active");
+      var target = btn.getAttribute("data-page");
+      document.getElementById("page-" + target).classList.add("active");
+      if(target === "trend") renderTrend();
     });
   });
 
@@ -875,7 +1220,7 @@
       if(isNaN(entryDate.getTime())) entryDate = new Date();
       var dateKey = dateKeyFromDate(entryDate);
 
-      addEntry({
+      var newEntry = {
         id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
         food_name: document.getElementById("cf_name").value.trim() || "未命名餐點",
         calories: numOrNull(document.getElementById("cf_kcal").value),
@@ -883,17 +1228,19 @@
         sugar_g: numOrNull(document.getElementById("cf_sugar").value),
         note: document.getElementById("cf_note").value.trim(),
         time: String(entryDate.getHours()).padStart(2,"0") + ":" + String(entryDate.getMinutes()).padStart(2,"0")
-      }, dateKey);
+      };
 
-      overlay.classList.remove("show");
+      addEntry(newEntry, dateKey);
 
       if(dateKey === todayKey()){
         renderEntries();
         renderSugar();
         renderProtein();
         renderBadges();
-        showToast();
+        renderColorStrip();
+        showResultSheet(newEntry);
       }else{
+        overlay.classList.remove("show");
         alert("已新增到 " + dateKey + " 的紀錄。目前清單只會顯示今天的紀錄，之後的「趨勢」頁會整合顯示歷史資料。");
       }
     });
@@ -904,6 +1251,325 @@
     return isNaN(n) ? null : Math.round(n*10)/10;
   }
 
+  // ---------- food color strip ----------
+  var FOOD_COLORS = [
+    "#6DC27E","#F5A84E","#7BAEF5","#E07070",
+    "#B97BEB","#F5D660","#5BC8D8","#F57BAA",
+    "#A8D88A","#F5C0A0","#80C8C8","#C8A0F5"
+  ];
+
+  function buildColorStrip(entries){
+    var valid = entries.filter(function(e){ return Number(e.calories) > 0; });
+    var source = valid.length > 0 ? valid : entries;
+    if(!source.length) return "";
+
+    var total = source.reduce(function(s,e){ return s + (Number(e.calories)||1); }, 0);
+    var maxCal = 0, dominant = null, dominantColor = "";
+
+    var segHtml = source.map(function(e, i){
+      var cal = Number(e.calories) || (total / source.length);
+      var color = FOOD_COLORS[i % FOOD_COLORS.length];
+      if(cal > maxCal){ maxCal = cal; dominant = e; dominantColor = color; }
+      var flex = (cal / total * 100).toFixed(2);
+      return '<div class="color-segment" style="flex:' + flex + ';background:' + color + '"></div>';
+    }).join("");
+
+    var domHtml = dominant
+      ? '<div class="color-dominant">' +
+          '<span class="color-dominant-dot" style="background:' + dominantColor + '"></span>' +
+          '<span>今天最多的：' + escapeHtml(dominant.food_name) +
+          (dominant.calories ? '（' + dominant.calories + ' kcal）' : '') + '</span>' +
+        '</div>'
+      : "";
+
+    return '<div class="color-strip">' + segHtml + '</div>' + domHtml;
+  }
+
+  function renderColorStrip(){
+    var wrap = document.getElementById("colorStripHome");
+    var entries = getTodayEntries();
+    if(!entries.length){
+      wrap.style.display = "none";
+      return;
+    }
+    wrap.style.display = "block";
+    wrap.innerHTML = '<div class="color-strip-title">今日食物彩帶</div>' + buildColorStrip(entries);
+  }
+
+  // ---------- result sheet ----------
+  function showResultSheet(entry){
+    var entries = getTodayEntries();
+    var sugarTotal = Math.round(entries.reduce(function(s,e){ return s+(Number(e.sugar_g)||0); },0)*10)/10;
+    var proteinTotal = Math.round(entries.reduce(function(s,e){ return s+(Number(e.protein_g)||0); },0)*10)/10;
+    var sugarLimit = getSugarLimit();
+    var proteinGoal = getProteinGoal();
+    var sugarOver = sugarTotal > sugarLimit;
+    var proteinDone = proteinTotal >= proteinGoal;
+    var proteinPct = Math.min(100, proteinGoal > 0 ? (proteinTotal/proteinGoal)*100 : 0).toFixed(1);
+    var sugarPct = Math.min(100, sugarLimit > 0 ? (sugarTotal/sugarLimit)*100 : 0).toFixed(1);
+    var dp = Math.round((Number(entry.protein_g)||0)*10)/10;
+    var ds = Math.round((Number(entry.sugar_g)||0)*10)/10;
+    var proteinRemain = Math.max(0, Math.round((proteinGoal - proteinTotal)*10)/10);
+    var sugarRemain = Math.max(0, Math.round((sugarLimit - sugarTotal)*10)/10);
+    var sugarExcess = Math.round((sugarTotal - sugarLimit)*10)/10;
+
+    var sheet = document.createElement("div");
+    sheet.className = "sheet";
+    sheet.innerHTML =
+      '<div class="result-hero">' +
+        '<div class="result-food-name">' + escapeHtml(entry.food_name) + '</div>' +
+        '<div class="result-kcal">' + (entry.calories != null ? entry.calories : "—") + '<small> kcal</small></div>' +
+      '</div>' +
+
+      '<div class="result-macro">' +
+        '<div class="result-macro-header">' +
+          '<span class="result-macro-label">蛋白質</span>' +
+          '<span class="result-macro-delta p-delta">' + (dp > 0 ? "＋" + dp + "g" : "—") + '</span>' +
+        '</div>' +
+        '<div class="result-bar-track"><div class="result-bar-fill pf" id="res_pbar" style="width:0"></div></div>' +
+        '<div class="result-macro-info">' +
+          '<span>今天共 ' + proteinTotal + 'g</span>' +
+          (proteinDone
+            ? '<span class="result-macro-done">✓ 達標 ' + proteinTotal + '/' + proteinGoal + 'g</span>'
+            : '<span class="result-macro-remain">還差 ' + proteinRemain + 'g</span>') +
+        '</div>' +
+      '</div>' +
+
+      '<div class="result-macro">' +
+        '<div class="result-macro-header">' +
+          '<span class="result-macro-label">添加糖</span>' +
+          '<span class="result-macro-delta ' + (sugarOver ? "s-over" : "s-delta") + '">' + (ds > 0 ? "＋" + ds + "g" : "—") + '</span>' +
+        '</div>' +
+        '<div class="result-bar-track"><div class="result-bar-fill ' + (sugarOver ? "sf-over" : "sf-ok") + '" id="res_sbar" style="width:0"></div></div>' +
+        '<div class="result-macro-info">' +
+          '<span>今天共 ' + sugarTotal + 'g</span>' +
+          (sugarOver
+            ? '<span class="result-macro-over">超標 ' + sugarExcess + 'g</span>'
+            : '<span class="result-macro-remain">還剩 ' + sugarRemain + 'g 額度</span>') +
+        '</div>' +
+      '</div>' +
+
+      '<div style="margin-bottom:18px;">' +
+        '<div class="color-strip-title">今日食物彩帶</div>' +
+        buildColorStrip(entries) +
+      '</div>' +
+
+      '<div class="sheet-actions">' +
+        '<button class="btn primary" id="res_close" style="font-size:18px;">收工 ✓</button>' +
+      '</div>';
+
+    overlay.innerHTML = "";
+    overlay.appendChild(sheet);
+    overlay.classList.add("show");
+
+    // Animate bars on next frame
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        var pb = document.getElementById("res_pbar");
+        var sb = document.getElementById("res_sbar");
+        if(pb) pb.style.width = proteinPct + "%";
+        if(sb) sb.style.width = sugarPct + "%";
+      });
+    });
+
+    document.getElementById("res_close").addEventListener("click", function(){
+      overlay.classList.remove("show");
+    });
+  }
+
+  // ---------- trend page ----------
+  function drawLineChart(svgId, points, unit, color){
+    var svg = document.getElementById(svgId);
+    var wrap = svg.parentNode;
+    var old = wrap.querySelector(".chart-empty");
+    if(old) wrap.removeChild(old);
+
+    var valid = points.filter(function(p){ return p.value != null && !isNaN(p.value); });
+    if(valid.length < 2){
+      svg.style.display = "none";
+      var msg = document.createElement("div");
+      msg.className = "chart-empty";
+      msg.textContent = valid.length === 0 ? "還沒有資料，先記一筆吧" : "再記一筆就能畫出趨勢囉";
+      wrap.appendChild(msg);
+      return;
+    }
+    svg.style.display = "block";
+
+    var W = 320, H = 130, padL = 34, padR = 10, padT = 12, padB = 20;
+    var vals = valid.map(function(p){ return p.value; });
+    var min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+    if(max - min < 0.5){ min -= 0.5; max += 0.5; }
+    var span = max - min;
+    min -= span * 0.12; max += span * 0.12;
+
+    function x(i){ return padL + (i/(valid.length-1)) * (W - padL - padR); }
+    function y(v){ return padT + (1 - (v - min)/(max - min)) * (H - padT - padB); }
+
+    var parts = [];
+    parts.push('<line x1="'+padL+'" y1="'+(H-padB)+'" x2="'+(W-padR)+'" y2="'+(H-padB)+'" stroke="var(--line)" stroke-width="1"/>');
+    parts.push('<text x="4" y="'+(padT+5)+'" font-size="9" fill="var(--muted)">'+(Math.round(max*10)/10)+'</text>');
+    parts.push('<text x="4" y="'+(H-padB)+'" font-size="9" fill="var(--muted)">'+(Math.round(min*10)/10)+'</text>');
+
+    var d = valid.map(function(p,i){ return (i===0?"M":"L") + x(i).toFixed(1) + "," + y(p.value).toFixed(1); }).join(" ");
+    var areaD = d + " L" + x(valid.length-1).toFixed(1) + "," + (H-padB) + " L" + x(0).toFixed(1) + "," + (H-padB) + " Z";
+    parts.push('<path d="'+areaD+'" fill="'+color+'" opacity="0.10"/>');
+    parts.push('<path d="'+d+'" fill="none" stroke="'+color+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>');
+
+    valid.forEach(function(p,i){
+      parts.push('<circle cx="'+x(i).toFixed(1)+'" cy="'+y(p.value).toFixed(1)+'" r="3.2" fill="var(--card)" stroke="'+color+'" stroke-width="2"/>');
+    });
+
+    var first = valid[0].date.slice(5).replace("-","/");
+    var last = valid[valid.length-1].date.slice(5).replace("-","/");
+    parts.push('<text x="'+padL+'" y="'+(H-6)+'" font-size="9" fill="var(--muted)">'+first+'</text>');
+    parts.push('<text x="'+(W-padR)+'" y="'+(H-6)+'" font-size="9" fill="var(--muted)" text-anchor="end">'+last+'</text>');
+
+    svg.innerHTML = parts.join("");
+  }
+
+  function renderTrend(){
+    var list = measuresSorted();
+
+    var latestEl = document.getElementById("latestStat");
+    var deltaEl = document.getElementById("statDelta");
+    if(list.length === 0){
+      latestEl.textContent = "—";
+      deltaEl.textContent = "還沒記過體重體脂，按上面的按鈕開始";
+    }else{
+      var latest = list[list.length-1];
+      var bits = [];
+      if(latest.weight != null) bits.push(latest.weight + " kg");
+      if(latest.fat != null) bits.push(latest.fat + "%");
+      latestEl.textContent = bits.join(" · ") || "—";
+
+      if(list.length >= 2){
+        var prev = list[list.length-2];
+        var msgs = [];
+        if(latest.weight != null && prev.weight != null){
+          var dw = Math.round((latest.weight - prev.weight)*10)/10;
+          msgs.push(dw === 0 ? "體重持平" : (dw < 0 ? "體重少了 " + Math.abs(dw) + " kg" : "體重多了 " + dw + " kg"));
+        }
+        if(latest.fat != null && prev.fat != null){
+          var df = Math.round((latest.fat - prev.fat)*10)/10;
+          msgs.push(df === 0 ? "體脂持平" : (df < 0 ? "體脂降了 " + Math.abs(df) + "%" : "體脂升了 " + df + "%"));
+        }
+        deltaEl.textContent = msgs.length ? "跟上次比，" + msgs.join("、") : "";
+      }else{
+        deltaEl.textContent = "再記幾次就能看出趨勢了";
+      }
+    }
+
+    drawLineChart("weightChart", list.map(function(m){ return {date:m.date, value:m.weight}; }), "kg", "var(--ink)");
+    drawLineChart("fatChart", list.map(function(m){ return {date:m.date, value:m.fat}; }), "%", "var(--alert)");
+
+    renderWeekSummary();
+  }
+
+  function renderWeekSummary(){
+    var all = loadEntries();
+    var limit = getSugarLimit();
+    var goal = getProteinGoal();
+    var container = document.getElementById("weekSummary");
+    var rows = [];
+    var d = new Date();
+    for(var i = 0; i < 7; i++){
+      var key = dateKeyFromDateObj(d);
+      var dayEntries = all[key] || [];
+      var sugar = dayEntries.reduce(function(s,e){ return s + (Number(e.sugar_g)||0); }, 0);
+      var protein = dayEntries.reduce(function(s,e){ return s + (Number(e.protein_g)||0); }, 0);
+      var wk = ["日","一","二","三","四","五","六"][d.getDay()];
+      var label = (i === 0 ? "今天" : (d.getMonth()+1) + "/" + d.getDate() + " 週" + wk);
+      rows.push({
+        label: label,
+        has: dayEntries.length > 0,
+        sugar: Math.round(sugar*10)/10,
+        protein: Math.round(protein*10)/10,
+        over: sugar > limit,
+        hitProtein: protein >= goal
+      });
+      d.setDate(d.getDate() - 1);
+    }
+    container.innerHTML = rows.map(function(r){
+      var vals = r.has
+        ? "糖 " + r.sugar + "g · 蛋 " + r.protein + "g" + (r.hitProtein ? " 💪" : "")
+        : "沒有紀錄";
+      return '<div class="week-row' + (r.over ? " over" : "") + '">' +
+        '<span class="day">' + r.label + '</span>' +
+        '<span class="vals">' + vals + '</span>' +
+      '</div>';
+    }).join("");
+  }
+
+  function renderHistory(){
+    var key = document.getElementById("historyDate").value;
+    var container = document.getElementById("historyList");
+    if(!key){
+      container.innerHTML = '<div class="empty-state">選一個日期看看那天吃了什麼</div>';
+      return;
+    }
+    var all = loadEntries();
+    var entries = all[key] || [];
+    if(entries.length === 0){
+      container.innerHTML = '<div class="empty-state">這天沒有紀錄</div>';
+      return;
+    }
+    var sugar = entries.reduce(function(s,e){ return s + (Number(e.sugar_g)||0); }, 0);
+    var protein = entries.reduce(function(s,e){ return s + (Number(e.protein_g)||0); }, 0);
+    container.innerHTML =
+      '<div class="week-row"><span class="day">這天合計</span><span class="vals">糖 ' +
+      (Math.round(sugar*10)/10) + 'g · 蛋 ' + (Math.round(protein*10)/10) + 'g</span></div>' +
+      entries.map(function(e){
+        return '<div class="entry' + (Number(e.sugar_g) >= 10 ? " high-sugar" : "") + '">' +
+          '<div class="meta">' +
+            '<div class="food">' + escapeHtml(e.food_name) + '</div>' +
+            '<div class="time">' + e.time + (e.note ? " · " + escapeHtml(e.note) : "") + '</div>' +
+          '</div>' +
+          '<div class="stats">' +
+            '<div class="kcal num">' + (e.calories!=null ? e.calories + " kcal" : "—") + '</div>' +
+            '<div class="num">蛋 ' + (e.protein_g!=null ? e.protein_g + "g" : "—") + ' · 糖 ' + (e.sugar_g!=null ? e.sugar_g + "g" : "—") + '</div>' +
+          '</div>' +
+        '</div>';
+      }).join("");
+  }
+
+  document.getElementById("historyDate").addEventListener("change", renderHistory);
+
+  document.getElementById("addMeasureBtn").addEventListener("click", function(){
+    var today = dateKeyFromDateObj(new Date());
+    var existing = loadMeasures()[today] || {};
+    var sheet = document.createElement("div");
+    sheet.className = "sheet";
+    sheet.innerHTML =
+      '<h2>記錄體重體脂</h2>' +
+      '<div class="field"><label>日期</label><input type="date" id="mf_date" value="' + today + '"></div>' +
+      '<div class="field"><label>體重（kg）</label><input type="number" step="0.1" id="mf_weight" value="' + (existing.weight != null ? existing.weight : "") + '"></div>' +
+      '<div class="field"><label>體脂率（%）</label><input type="number" step="0.1" id="mf_fat" value="' + (existing.fat != null ? existing.fat : "") + '"></div>' +
+      '<div class="sheet-actions">' +
+        '<button class="btn ghost" id="mf_cancel">取消</button>' +
+        '<button class="btn primary" id="mf_save">儲存</button>' +
+      '</div>';
+    overlay.innerHTML = "";
+    overlay.appendChild(sheet);
+    overlay.classList.add("show");
+
+    document.getElementById("mf_cancel").addEventListener("click", function(){
+      overlay.classList.remove("show");
+    });
+    document.getElementById("mf_save").addEventListener("click", function(){
+      var dateVal = document.getElementById("mf_date").value || today;
+      var w = numOrNull(document.getElementById("mf_weight").value);
+      var f = numOrNull(document.getElementById("mf_fat").value);
+      if(w == null && f == null){
+        alert("至少填一個數字吧");
+        return;
+      }
+      saveMeasure(dateVal, w, f);
+      overlay.classList.remove("show");
+      renderTrend();
+      showToast("📏 量測記好了");
+    });
+  });
+
   // ---------- init ----------
   renderDate();
   renderSugar();
@@ -911,6 +1577,9 @@
   renderBadges();
   renderEntries();
   loadSettingsForm();
+  renderColorStrip();
+  renderTrend();
+  renderHistory();
 
   if("serviceWorker" in navigator){
     window.addEventListener("load", function(){
